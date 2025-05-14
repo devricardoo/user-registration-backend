@@ -17,3 +17,14 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/404', 'App\Http\Controllers\AuthController@unauthorized');
+
+Route::post('/auth/login', 'App\Http\Controllers\AuthController@login');
+Route::post('/auth/logout', 'App\Http\Controllers\AuthController@logout');
+Route::post('/auth/refresh', 'App\Http\Controllers\AuthController@refresh');
+
+Route::get('/user', 'App\Http\Controllers\UserController@index');
+Route::post('/user', 'App\Http\Controllers\UserController@create');
+Route::put('/user/{id}', 'App\Http\Controllers\UserController@update');
+Route::delete('/user/{id}', 'App\Http\Controllers\UserController@delete');
