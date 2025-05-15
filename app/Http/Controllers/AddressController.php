@@ -22,17 +22,21 @@ class AddressController extends Controller
         return response()->json(['address' => $address], 200);
     }
 
-    public function createaddress(Request $request)
+    public function store(Request $request)
     {
         $rules = [
-            'public_place' => 'required',
+            'public_place' => 'required|max:100|unique:addresses,public_place',
             'cep' => 'required|regex:/^\d{5}-?\d{3}$/|max:8',
+            'users' => 'array',
+            'users.*' => 'exists:users,id',
         ];
 
         $feedback = [
             'required' => 'O campo :attribute é obrigatório',
             'max' => 'O campo :attribute precisa ter no máximo :max caracteres',
             'regex' => 'Informe um CEP válido',
+            'exists' => 'Esse usuário não existe',
+            'unique' => 'Esse endereço já foi cadastrado',
         ];
 
         $request->validate($rules, $feedback);
@@ -42,10 +46,15 @@ class AddressController extends Controller
             'cep' => $request->cep,
         ]);
 
-        return response()->json(['address' => $address], 200);
+        //associa o endereço aos usuários
+        if ($request->has('users')) {
+            $address->users()->attach($request->users);
+        }
+
+        return response()->json(['msg' => 'Endereço cadastrado com sucesso!'], 200);
     }
 
-    public function updateaddress(Request $request, $id)
+    public function update(Request $request, $id)
     {
         $address = $this->address->find($id);
 
@@ -60,12 +69,34 @@ class AddressController extends Controller
                     $rulesDinamic[$input] = $rule;
                 }
             }
+            if ($request->has('users')) {
+                $rulesDinamic['users'] = 'array';
+                $rulesDinamic['users.*'] = 'exists:users,id';
+            }
+
             $request->validate($rulesDinamic, $address->feedback());
         } else {
-            $request->validate($address->rules(), $address->feedback());
+
+            $rules = $address->rules();
+
+            if ($request->has('users')) {
+                $rules['users'] = 'array';
+                $rules['users.*'] = 'exists:users,id';
+            }
+
+            $request->validate($rules, $address->feedback());
         }
         $address->update($request->all());
 
-        return response()->json(['address' => $address], 200);
+        if ($request->has('users')) {
+            $address->users()->sync($request->users);
+        }
+
+        return response()->json(['address' => $address->load('users')], 200);
+    }
+
+    public function delete($id)
+    {
+        return response()->json(['msg' => 'Endereço deletado com sucesso'], 200);
     }
 }
