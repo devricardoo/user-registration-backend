@@ -33,7 +33,7 @@ class User extends Authenticatable implements JWTSubject
         'profile_id' => 'integer',
     ];
 
-    public function profiles()
+    public function profile()
     {
         return $this->belongsTo(Profile::class);
     }
