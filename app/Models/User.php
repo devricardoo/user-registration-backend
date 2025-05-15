@@ -18,6 +18,16 @@ class User extends Authenticatable implements JWTSubject
         'token',
     ];
 
+    protected $table = 'users';
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'cpf',
+        'token',
+    ];
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
