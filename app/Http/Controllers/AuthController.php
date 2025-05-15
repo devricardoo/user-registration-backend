@@ -35,6 +35,7 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:100|unique:users,email',
             'password' => 'required|string|min:4',
             'cpf' => 'required|string|min:11|unique:users,cpf',
+            'profile_id' => 'required|exists:profiles,id',
         ];
 
         $feedback = [
@@ -42,6 +43,7 @@ class AuthController extends Controller
             'unique' => 'O campo :attribute já existe',
             'email' => 'O campo :attribute precisa ser um email válido',
             'min' => 'O campo :attribute precisa ter no mínimo :min caracteres',
+            'exists' => 'Esse perfil não existe',
         ];
 
         $request->validate($rules, $feedback);
@@ -52,6 +54,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => bcrypt($request->password),
             'cpf' => $request->cpf,
+            'profile_id' => $request->profile_id
         ]);
 
         $credentials = $request->only('email', 'password');
