@@ -25,10 +25,15 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'cpf',
+        'profile_id',
         'token',
     ];
 
-    public function profile()
+    protected $casts = [
+        'profile_id' => 'integer',
+    ];
+
+    public function profiles()
     {
         return $this->belongsTo(Profile::class);
     }
