@@ -10,4 +10,9 @@ class Profile extends Model
     use HasFactory;
 
     protected $table = 'profiles';
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

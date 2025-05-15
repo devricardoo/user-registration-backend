@@ -10,4 +10,9 @@ class Address extends Model
     use HasFactory;
 
     protected $table = 'addresses';
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'addresses_users');
+    }
 }

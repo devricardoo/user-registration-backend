@@ -28,6 +28,16 @@ class User extends Authenticatable implements JWTSubject
         'token',
     ];
 
+    public function profile()
+    {
+        return $this->belongsTo(Profile::class);
+    }
+
+    public function addresses()
+    {
+        return $this->belongsToMany(Address::class, 'addresses_users');
+    }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
