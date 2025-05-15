@@ -97,6 +97,18 @@ class AddressController extends Controller
 
     public function delete($id)
     {
+        $authUser = Auth::user();
+        $address = $this->address->find($id);
+        if (!$authUser) {
+            return response()->json(['msg' => 'Usuário não está logado '], 404);
+        }
+
+        if (!$address) {
+            return response()->json(['msg' => 'Endereço não encontrado'], 404);
+        }
+
+        $address->delete();
+
         return response()->json(['msg' => 'Endereço deletado com sucesso'], 200);
     }
 }
