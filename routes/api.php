@@ -22,16 +22,19 @@ Route::post('/auth/refresh', 'App\Http\Controllers\AuthController@refresh');
 Route::post('/user', 'App\Http\Controllers\AuthController@create');
 
 Route::get('/user', 'App\Http\Controllers\UserController@index');
+//Route::get('/user/{id}', 'App\Http\Controllers\UserController@show');
 Route::put('/user/{id}', 'App\Http\Controllers\UserController@update');
 Route::patch('/user/{id}', 'App\Http\Controllers\UserController@update');
 Route::delete('/user/{id}', 'App\Http\Controllers\UserController@delete');
 
 Route::post('/profile', 'App\Http\Controllers\UserController@createprofile');
-Route::post('/profile/{id}', 'App\Http\Controllers\ProfileController@updateprofile');
-Route::delete('/profile/{id}', 'App\Http\Controllers\ProfileController@deleteprofile');
+Route::post('/profile/{id}', 'App\Http\Controllers\ProfileController@update');
+Route::delete('/profile/{id}', 'App\Http\Controllers\ProfileController@delete');
 
 Route::get('/address', 'App\Http\Controllers\AddressController@index');
-Route::post('/address', 'App\Http\Controllers\AddressController@createaddress');
-Route::put('/address/{id}', 'App\Http\Controllers\AddressController@updateaddress');
-Route::patch('/address/{id}', 'App\Http\Controllers\AddressController@updateaddress');
-Route::delete('/address/{id}', 'App\Http\Controllers\AddressController@deleteaddress');
+Route::post('/address', 'App\Http\Controllers\AddressController@store');
+//Route::put('/address/{id}', 'App\Http\Controllers\AddressController@update');
+//Route::patch('/address/{id}', 'App\Http\Controllers\AddressController@update');
+Route::delete('/address/{id}', 'App\Http\Controllers\AddressController@delete');
+
+Route::get('/search', 'App\Http\Controllers\SearchController@search');
