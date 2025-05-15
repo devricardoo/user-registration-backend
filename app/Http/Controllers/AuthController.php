@@ -64,4 +64,18 @@ class AuthController extends Controller
             'user' => $user
         ], 200);
     }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        if ($token = Auth::attempt($credentials)) {
+            return response()->json([
+                'token' => $token,
+                'msg' => 'Seja bem vindo(a)'
+            ], 200);
+        } else {
+            return response()->json(['error' => 'Usuário ou senha inválidos'], 401);
+        }
+    }
 }
