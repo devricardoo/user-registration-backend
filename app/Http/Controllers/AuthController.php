@@ -78,4 +78,15 @@ class AuthController extends Controller
             return response()->json(['error' => 'Usuário ou senha inválidos'], 401);
         }
     }
+
+    public function logout()
+    {
+        $user = auth()->check();
+        if ($user) {
+            auth()->logout();
+            return response()->json(['msg' => 'Logout realizado com sucesso'], 200);
+        } else {
+            return response()->json(['msg' => 'Usuário não logado'], 401);
+        }
+    }
 }
