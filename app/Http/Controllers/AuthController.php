@@ -33,9 +33,11 @@ class AuthController extends Controller
         $rules = [
             'name' => 'required',
             'email' => 'required|string|email|max:100|unique:users,email',
-            'password' => 'required|string|min:4',
+            'password' => 'required|string|min:4|confirmed',
             'cpf' => 'required|string|min:11|unique:users,cpf',
             'profile_id' => 'required|exists:profiles,id',
+            'addresses' => 'array',
+            'addresses.*' => 'integer|exists:addresses,id',
         ];
 
         $feedback = [
@@ -44,6 +46,7 @@ class AuthController extends Controller
             'email' => 'O campo :attribute precisa ser um email válido',
             'min' => 'O campo :attribute precisa ter no mínimo :min caracteres',
             'exists' => 'Esse perfil não existe',
+            'confirmed' => 'As senhas precisam ser iguais',
         ];
 
         $request->validate($rules, $feedback);
@@ -57,6 +60,10 @@ class AuthController extends Controller
             'profile_id' => $request->profile_id
         ]);
 
+        if ($request->has('addresses')) {
+            $user->addresses()->attach($request->addresses);
+        }
+
         $credentials = $request->only('email', 'password');
 
         if (!$token = Auth::attempt($credentials)) {
@@ -64,8 +71,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'token' => $token,
-            'user' => $user
+            'token' => $token
         ], 200);
     }
 
@@ -76,10 +82,9 @@ class AuthController extends Controller
         if ($token = Auth::attempt($credentials)) {
             return response()->json([
                 'token' => $token,
-                'msg' => 'Seja bem vindo(a)'
             ], 200);
         } else {
-            return response()->json(['error' => 'Usuário ou senha inválidos'], 401);
+            return response()->json(['error' => 'E-mail ou senha inválidos'], 401);
         }
     }
 
