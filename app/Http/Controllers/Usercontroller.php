@@ -73,12 +73,6 @@ class Usercontroller extends Controller
 
     public function delete($id)
     {
-        $userAuth = Auth::user();
-
-        if (!$userAuth) {
-            return response()->json(['error' => 'Usuário não está logado'], 401);
-        }
-
         $user = User::find($id);
 
         if (!$user) {
@@ -89,7 +83,6 @@ class Usercontroller extends Controller
         if ($auth->id == $user->id) {
             return response()->json(['msg' => 'Usuário logado não pode ser deletado'], 401);
         }
-
         $user->delete();
 
         return response()->json(['msg' => 'Usuário deletado com sucesso'], 200);
