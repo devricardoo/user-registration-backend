@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -88,5 +89,14 @@ class AuthController extends Controller
         } else {
             return response()->json(['msg' => 'Usuário não logado'], 401);
         }
+    }
+
+    public function refresh()
+    {
+        $newToken = JWTAuth::parseToken()->refresh();
+
+        return response()->json([
+            'token' => $newToken,
+        ]);
     }
 }
