@@ -19,7 +19,7 @@ class Usercontroller extends Controller
 
     public function index()
     {
-        $user = User::all();
+        $user = User::with(['profile', 'addresses'])->get();
         return response()->json($user, 200);
     }
 
@@ -41,21 +41,57 @@ class Usercontroller extends Controller
             $rulesDinamic = array();
             foreach ($user->rules() as $input => $rule) {
                 if (array_key_exists($input, $request->all())) {
-                    $rulesDinamic[$input] = $rule;
+                    if ($input == 'password') {
+                        $rulesDinamic[$input] = 'confirmed|string|min:4';
+                    } else {
+                        $rulesDinamic[$input] = $rule;
+                    }
                 }
             }
+            if ($request->has('addresses')) {
+                $rulesDinamic['addresses'] = 'array';
+                $rulesDinamic['addresses.*'] = 'exists:addresses,id';
+            }
+
             $request->validate($rulesDinamic, $user->feedback());
         } else {
+            $rules = $user->rules();
+
+            if ($request->has('addresses')) {
+                $rules['addresses'] = 'array';
+                $rules['addresses.*'] = 'exists:addresses,id';
+            }
             $request->validate($user->rules(), $user->feedback());
         }
         $user->update($request->all());
-        return response()->json($user, 200);
+
+        if ($request->has('addresses')) {
+            $user->addresses()->sync($request->addresses);
+        }
+        return response()->json($user->load('addresses'), 200);
     }
 
     public function delete($id)
     {
+        $userAuth = Auth::user();
+
+        if (!$userAuth) {
+            return response()->json(['error' => 'Usuário não está logado'], 401);
+        }
+
         $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['msg' => 'Usuário nao encontrado'], 404);
+        }
+
+        $auth = Auth::user();
+        if ($auth->id == $user->id) {
+            return response()->json(['msg' => 'Usuário logado não pode ser deletado'], 401);
+        }
+
         $user->delete();
+
         return response()->json(['msg' => 'Usuário deletado com sucesso'], 200);
     }
 }
