@@ -9,7 +9,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function __construct()
+    private $user;
+
+    public function __construct(User $user)
     {
         $this->middleware('auth:api', [
             'except' => [
@@ -19,6 +21,8 @@ class AuthController extends Controller
                 'user',
             ]
         ]);
+
+        $this->user = $user;
     }
 
     public function unauthorized()
@@ -30,26 +34,7 @@ class AuthController extends Controller
 
     public function create(Request $request)
     {
-        $rules = [
-            'name' => 'required',
-            'email' => 'required|string|email|max:100|unique:users,email',
-            'password' => 'required|string|min:4|confirmed',
-            'cpf' => 'required|string|min:11|unique:users,cpf',
-            'profile_id' => 'required|exists:profiles,id',
-            'addresses' => 'array',
-            'addresses.*' => 'integer|exists:addresses,id',
-        ];
-
-        $feedback = [
-            'required' => 'O campo :attribute é obrigatório',
-            'unique' => 'O campo :attribute já existe',
-            'email' => 'O campo :attribute precisa ser um email válido',
-            'min' => 'O campo :attribute precisa ter no mínimo :min caracteres',
-            'exists' => 'Esse perfil não existe',
-            'confirmed' => 'As senhas precisam ser iguais',
-        ];
-
-        $request->validate($rules, $feedback);
+        $request->validate($this->user->rules(), $this->user->feedback());
 
 
         $user = User::create([
@@ -95,7 +80,7 @@ class AuthController extends Controller
             auth()->logout();
             return response()->json(['msg' => 'Logout realizado com sucesso'], 200);
         } else {
-            return response()->json(['msg' => 'Usuário não logado'], 401);
+            return response()->json(['error' => 'Usuário não logado'], 401);
         }
     }
 
