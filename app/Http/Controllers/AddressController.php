@@ -22,31 +22,25 @@ class AddressController extends Controller
         return response()->json(['address' => $address], 200);
     }
 
+    public function show($id)
+    {
+        $address = $this->address->find($id);
+        if (!$address) {
+            return response()->json(['error' => 'Endereço não encontrado'], 404);
+        }
+        return response()->json(['address' => $address], 200);
+    }
+
     public function store(Request $request)
     {
-        $rules = [
-            'public_place' => 'required|max:100|unique:addresses,public_place',
-            'cep' => 'required|regex:/^\d{5}-?\d{3}$/|max:8',
-            'users' => 'array',
-            'users.*' => 'exists:users,id',
-        ];
-
-        $feedback = [
-            'required' => 'O campo :attribute é obrigatório',
-            'max' => 'O campo :attribute precisa ter no máximo :max caracteres',
-            'regex' => 'Informe um CEP válido',
-            'exists' => 'Esse usuário não existe',
-            'unique' => 'Esse endereço já foi cadastrado',
-        ];
-
-        $request->validate($rules, $feedback);
+        $request->validate($this->address->rules(), $this->address->feedback());
 
         $address = Address::create([
             'public_place' => $request->public_place,
             'cep' => $request->cep,
         ]);
 
-        //associa o endereço aos usuários
+        //associates the address with the users
         if ($request->has('users')) {
             $address->users()->attach($request->users);
         }
@@ -92,7 +86,7 @@ class AddressController extends Controller
             $address->users()->sync($request->users);
         }
 
-        return response()->json(['address' => $address->load('users')], 200);
+        return response()->json(['msg' => 'Endereço atualizado com sucesso'], 200);
     }
 
     public function delete($id)
