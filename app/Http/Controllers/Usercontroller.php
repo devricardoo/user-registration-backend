@@ -29,12 +29,21 @@ class Usercontroller extends Controller
         return response()->json($profile, 200);
     }
 
+    public function show($id)
+    {
+        $user = User::with(['profile', 'addresses'])->find($id);
+        if (!$user) {
+            return response()->json(['error' => 'Usuário não encontrado'], 404);
+        }
+        return response()->json($user, 200);
+    }
+
     public function update(Request $request, $id)
     {
         $user = $this->user->find($id);
 
         if ($user == null) {
-            return response()->json(['msg' => 'Este usuário não foi encontrado'], 404);
+            return response()->json(['error' => 'Este usuário não foi encontrado'], 404);
         }
 
         if ($request->method() === 'PATCH') {
@@ -76,12 +85,12 @@ class Usercontroller extends Controller
         $user = User::find($id);
 
         if (!$user) {
-            return response()->json(['msg' => 'Usuário nao encontrado'], 404);
+            return response()->json(['error' => 'Usuário não encontrado'], 404);
         }
 
         $auth = Auth::user();
         if ($auth->id == $user->id) {
-            return response()->json(['msg' => 'Usuário logado não pode ser deletado'], 401);
+            return response()->json(['error' => 'Usuário logado não pode ser deletado'], 401);
         }
         $user->delete();
 
