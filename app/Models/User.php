@@ -61,6 +61,8 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'required|string|min:4',
             'cpf' => 'required|string|max:11|unique:users,cpf',
             'profile_id' => 'nullable|exists:profiles,id',
+            'addresses' => 'array',
+            'addresses.*' => 'integer|exists:addresses,id',
         ];
     }
 
@@ -71,6 +73,8 @@ class User extends Authenticatable implements JWTSubject
             'unique' => 'O campo :attribute já existe',
             'email' => 'O campo :attribute precisa ser um email válido',
             'min' => 'O campo :attribute precisa ter no mínimo :min caracteres',
+            'exists' => 'Esse perfil não existe',
+            'confirmed' => 'As senhas precisam ser iguais',
         ];
     }
 }
