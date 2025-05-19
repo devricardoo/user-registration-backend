@@ -38,6 +38,11 @@ class AddressController extends Controller
         $address = Address::create([
             'public_place' => $request->public_place,
             'cep' => $request->cep,
+            'neighborhood' => $request->neighborhood,
+            'city' => $request->city,
+            'state' => $request->state,
+            'number' => $request->number,
+            'complement' => $request->complement
         ]);
 
         //associates the address with the users
