@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -36,7 +38,6 @@ class AuthController extends Controller
     {
         $request->validate($this->user->rules(), $this->user->feedback());
 
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -45,8 +46,26 @@ class AuthController extends Controller
             'profile_id' => $request->profile_id
         ]);
 
-        if ($request->has('addresses')) {
-            $user->addresses()->attach($request->addresses);
+        // Lida com todos os endereços (novos ou IDs)
+        foreach ($request->addresses as $address) {
+            if (is_int($address)) {
+                // ID existente
+                $user->addresses()->syncWithoutDetaching($address);
+            } elseif (is_array($address) && isset($address['public_place'], $address['cep'], $address['neighborhood'], $address['city'], $address['state'], $address['state'], $address['number'], $address['complement'])) {
+                // Novo endereço
+                $newAddress = Address::firstOrCreate([
+                    'public_place' => $address['public_place'],
+                    'cep' => $address['cep'],
+                    'neighborhood' => $address['neighborhood'],
+                    'city' => $address['city'],
+                    'state' => $address['state'],
+                    'number' => $address['number'],
+                    'complement' => $address['complement'],
+                ]);
+                $user->addresses()->syncWithoutDetaching($newAddress->id);
+            } else {
+                Log::warning('Endereço inválido no cadastro:', ['address' => $address]);
+            }
         }
 
         $credentials = $request->only('email', 'password');
@@ -59,6 +78,7 @@ class AuthController extends Controller
             'token' => $token
         ], 200);
     }
+
 
     public function login(Request $request)
     {
@@ -91,5 +111,10 @@ class AuthController extends Controller
         return response()->json([
             'token' => $newToken,
         ]);
+    }
+
+    public function me()
+    {
+        return response()->json(auth()->user());
     }
 }
