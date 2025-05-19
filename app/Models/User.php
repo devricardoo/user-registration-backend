@@ -58,11 +58,18 @@ class User extends Authenticatable implements JWTSubject
         return [
             'name' => 'required',
             'email' => 'required|string|email|max:100|unique:users,email',
-            'password' => 'required|string|min:4',
+            'password' => 'required|string|min:4|confirmed',
             'cpf' => 'required|string|max:11|unique:users,cpf',
             'profile_id' => 'nullable|exists:profiles,id',
-            'addresses' => 'array',
-            'addresses.*' => 'integer|exists:addresses,id',
+            'addresses' => 'required|array|min:1',
+            'addresses.*' => 'required',
+            'addresses.*.public_place' => 'sometimes|required|string',
+            'addresses.*.cep' => 'sometimes|required|string',
+            'addresses.*.neighborhood' => 'sometimes|required|string',
+            'addresses.*.city' => 'sometimes|required|string',
+            'addresses.*.state' => 'sometimes|required|string',
+            'addresses.*.number' => 'sometimes|required|string',
+            'addresses.*.complement' => 'sometimes|required|string',
         ];
     }
 
@@ -75,6 +82,7 @@ class User extends Authenticatable implements JWTSubject
             'min' => 'O campo :attribute precisa ter no mínimo :min caracteres',
             'exists' => 'Esse perfil não existe',
             'confirmed' => 'As senhas precisam ser iguais',
+
         ];
     }
 }
