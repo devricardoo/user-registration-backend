@@ -11,7 +11,7 @@ class Address extends Model
 
     protected $table = 'addresses';
 
-    protected $fillable = ['public_place', 'cep'];
+    protected $fillable = ['public_place', 'cep', 'neighborhood', 'city', 'state', 'number', 'complement'];
 
     public function users()
     {
@@ -25,6 +25,11 @@ class Address extends Model
             'cep' => 'required|regex:/^\d{5}-?\d{3}$/|max:8',
             'users' => 'array',
             'users.*' => 'exists:users,id',
+            'neighborhood' => 'required|max:100',
+            'city' => 'required|max:50',
+            'state' => 'required|max:2',
+            'number' => 'max:10',
+            'complement' => 'max:100',
         ];
     }
 
