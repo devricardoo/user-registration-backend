@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -63,7 +64,7 @@ class Usercontroller extends Controller
         }
 
         if ($request->method() === 'PATCH') {
-            $rulesDinamic = array();
+            $rulesDinamic = [];
             foreach ($user->rules() as $input => $rule) {
                 if (array_key_exists($input, $request->all())) {
                     if ($input == 'password') {
@@ -73,28 +74,41 @@ class Usercontroller extends Controller
                     }
                 }
             }
+
             if ($request->has('addresses')) {
-                $rulesDinamic['addresses'] = 'array';
-                $rulesDinamic['addresses.*'] = 'exists:addresses,id';
+                foreach ($user->rules() as $input => $rule) {
+                    if (str_starts_with($input, 'addresses')) {
+                        $rulesDinamic[$input] = $rule;
+                    }
+                }
             }
+
 
             $request->validate($rulesDinamic, $user->feedback());
         } else {
-            $rules = $user->rules();
-
-            if ($request->has('addresses')) {
-                $rules['addresses'] = 'array';
-                $rules['addresses.*'] = 'exists:addresses,id';
-            }
             $request->validate($user->rules(), $user->feedback());
         }
+
         $user->update($request->all());
 
+        // Atualiza endereços
         if ($request->has('addresses')) {
-            $user->addresses()->sync($request->addresses);
+            foreach ($request->addresses as $addressData) {
+                $address = Address::find($addressData['id']);
+
+                // Verifica se o endereço está vinculado ao usuário
+                if (!$user->addresses->contains($address->id)) {
+                    return response()->json(['error' => 'Endereço não pertence ao usuário'], 403);
+                }
+
+                $address->update($addressData);
+            }
         }
-        return response()->json($user->load('addresses'), 200);
+
+        return response()->json($user->load('profile', 'addresses'), 200);
     }
+
+
 
     public function delete($id)
     {
