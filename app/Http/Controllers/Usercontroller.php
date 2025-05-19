@@ -17,11 +17,27 @@ class Usercontroller extends Controller
     }
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $user = User::with(['profile', 'addresses'])->get();
-        return response()->json($user, 200);
+        $validated = $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'page' => 'nullable|integer|min:1',
+        ]);
+
+
+        $perPage = $validated['per_page'] ?? 5;
+        $page = $validated['page'] ?? 1;
+
+        // Recupera os usuários paginados com as relações 'profile' e 'addresses'
+        $users = User::with(['profile', 'addresses'])
+            ->paginate($perPage);
+
+        // Adiciona os parâmetros 'per_page' e 'page' à resposta de paginação para facilitar a navegação no frontend
+        $users->appends($request->all());
+
+        return response()->json($users, 200);
     }
+
 
     public function createprofile(Request $request)
     {
