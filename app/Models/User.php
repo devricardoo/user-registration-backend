@@ -57,19 +57,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return [
             'name' => 'required',
-            'email' => 'required|string|email|max:100|unique:users,email',
+            'email' => 'required|string|email|max:100|unique:users,email,' . $this->id,
             'password' => 'required|string|min:4|confirmed',
-            'cpf' => 'required|string|max:11|unique:users,cpf',
+            'cpf' => 'required|string|max:11|unique:users,cpf,' . $this->id,
             'profile_id' => 'nullable|exists:profiles,id',
-            'addresses' => 'required|array|min:1',
-            'addresses.*' => 'required',
-            'addresses.*.public_place' => 'sometimes|required|string',
-            'addresses.*.cep' => 'sometimes|required|string',
-            'addresses.*.neighborhood' => 'sometimes|required|string',
-            'addresses.*.city' => 'sometimes|required|string',
-            'addresses.*.state' => 'sometimes|required|string',
-            'addresses.*.number' => 'sometimes|required|string',
-            'addresses.*.complement' => 'sometimes|required|string',
+            'addresses' => 'sometimes|array',
+            'addresses.*.id' => 'required|exists:addresses,id',
+            'addresses.*.public_place' => 'nullable|string',
+            'addresses.*.cep' => 'nullable|string',
+            'addresses.*.neighborhood' => 'nullable|string',
+            'addresses.*.city' => 'nullable|string',
+            'addresses.*.state' => 'nullable|string',
+            'addresses.*.number' => 'nullable|string',
+            'addresses.*.complement' => 'nullable|string',
+
         ];
     }
 
