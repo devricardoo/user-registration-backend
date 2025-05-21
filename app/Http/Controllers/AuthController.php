@@ -46,13 +46,13 @@ class AuthController extends Controller
             'profile_id' => $request->profile_id
         ]);
 
-        // Lida com todos os endereços (novos ou IDs)
+        // Handles all addresses (new or IDs)
         foreach ($request->addresses as $address) {
             if (is_int($address)) {
-                // ID existente
+                // Existing ID
                 $user->addresses()->syncWithoutDetaching($address);
             } elseif (is_array($address) && isset($address['public_place'], $address['cep'], $address['neighborhood'], $address['city'], $address['state'], $address['state'], $address['number'], $address['complement'])) {
-                // Novo endereço
+
                 $newAddress = Address::firstOrCreate([
                     'public_place' => $address['public_place'],
                     'cep' => $address['cep'],
@@ -115,6 +115,6 @@ class AuthController extends Controller
 
     public function me()
     {
-        return response()->json(auth()->user());
+        return response()->json(User::with('profile')->find(auth()->id()));
     }
 }
