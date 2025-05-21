@@ -15,7 +15,8 @@ class Address extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'addresses_users');
+        return $this->belongsToMany(User::class, 'addresses_users')
+            ->withPivot('address_id', 'user_id');
     }
 
     public function rules()
