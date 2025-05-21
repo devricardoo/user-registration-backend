@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Profile;
+use Illuminate\Support\Facades\Hash;
 
 class Usercontroller extends Controller
 {
@@ -29,11 +30,10 @@ class Usercontroller extends Controller
         $perPage = $validated['per_page'] ?? 5;
         $page = $validated['page'] ?? 1;
 
-        // Recupera os usuários paginados com as relações 'profile' e 'addresses'
         $users = User::with(['profile', 'addresses'])
             ->paginate($perPage);
 
-        // Adiciona os parâmetros 'per_page' e 'page' à resposta de paginação para facilitar a navegação no frontend
+        // Adds 'per_page' and 'page' parameters to pagination response to make frontend navigation easier
         $users->appends($request->all());
 
         return response()->json($users, 200);
@@ -83,32 +83,37 @@ class Usercontroller extends Controller
                 }
             }
 
-
             $request->validate($rulesDinamic, $user->feedback());
         } else {
             $request->validate($user->rules(), $user->feedback());
         }
 
-        $user->update($request->all());
+        $data = $request->all();
 
-        // Atualiza endereços
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        $user->update($data);
+
+
         if ($request->has('addresses')) {
             foreach ($request->addresses as $addressData) {
-                $address = Address::find($addressData['id']);
-
-                // Verifica se o endereço está vinculado ao usuário
-                if (!$user->addresses->contains($address->id)) {
-                    return response()->json(['error' => 'Endereço não pertence ao usuário'], 403);
+                if (isset($addressData['id'])) {
+                    $address = Address::find($addressData['id']);
+                    if (!$address || !$user->addresses->contains($address->id)) {
+                        return response()->json(['error' => 'Endereço não pertence ao usuário'], 403);
+                    }
+                    $address->update($addressData);
+                } else {
+                    // Creates new address linked to the user
+                    $user->addresses()->create($addressData);
                 }
-
-                $address->update($addressData);
             }
         }
 
         return response()->json($user->load('profile', 'addresses'), 200);
     }
-
-
 
     public function delete($id)
     {
@@ -122,6 +127,16 @@ class Usercontroller extends Controller
         if ($auth->id == $user->id) {
             return response()->json(['error' => 'Usuário logado não pode ser deletado'], 401);
         }
+
+
+        $user->addresses()->detach();
+
+        foreach ($user->addresses as $address) {
+            if ($address->users()->count() === 0) {
+                $address->delete();
+            }
+        }
+
         $user->delete();
 
         return response()->json(['msg' => 'Usuário deletado com sucesso'], 200);
