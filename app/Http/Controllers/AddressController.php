@@ -16,10 +16,36 @@ class AddressController extends Controller
         $this->address = $address;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $address = Address::all();
-        return response()->json(['address' => $address], 200);
+        $validated = $request->validate([
+            'per_page' => 'nullable|integer|min:1|max:100',
+            'page' => 'nullable|integer|min:1',
+        ]);
+
+
+        $perPage = $validated['per_page'] ?? 5;
+        $page = $validated['page'] ?? 1;
+
+        $addresses = Address::with(['users',])
+            ->paginate($perPage);
+
+
+        // Adds 'per_page' and 'page' parameters to pagination response to make frontend navigation easier
+        $addresses->appends($request->all());
+
+        return response()->json($addresses, 200);
+    }
+
+    public function searchByCep($cep)
+    {
+        $address = Address::where('cep', $cep)->first();
+
+        if (!$address) {
+            return response()->json(['message' => 'Endereço não encontrado.'], 404);
+        }
+
+        return response()->json($address);
     }
 
     public function show($id)
