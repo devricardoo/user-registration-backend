@@ -40,3 +40,5 @@ Route::post('/address', 'App\Http\Controllers\AddressController@store');
 Route::delete('/address/{id}', 'App\Http\Controllers\AddressController@delete');
 
 Route::get('/search', 'App\Http\Controllers\SearchController@search');
+
+Route::get('/address/cep/{cep}', 'App\Http\Controllers\AddressController@searchByCep');
