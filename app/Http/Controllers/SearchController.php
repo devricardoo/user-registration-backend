@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Carbon\Carbon;
 
 class SearchController extends Controller
 {
@@ -14,30 +15,26 @@ class SearchController extends Controller
 
     public function search(Request $request)
     {
-        $txt = $request->input('txt');
+        $query = User::query();
 
-        if ($txt) {
-            $users = User::where('name', 'like', '%' . $txt . '%')
-                ->orWhere('email', 'like', '%' . $txt . '%')
-                ->orWhere('cpf', 'like', '%' . $txt . '%')
-                ->orWhere('profile_id', 'like', '%' . $txt . '%')
-                ->orWhere('created_at', 'like', '%' . $txt . '%')
-                ->get();
-
-            foreach ($users as $user) {
-                $array['users'][] = [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'cpf' => $user->cpf,
-                    'profile_id' => $user->profile_id,
-                    'created_at' => $user->created_at
-                ];
-            }
-        } else {
-            return response()->json(['error' => 'Digite alguma informação!'], 400);
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
-        return response()->json(['data' => $array['users']], 200);
+        if ($request->filled('cpf')) {
+            $query->where('cpf', $request->cpf);
+        }
+
+        if ($request->filled('startDate')) {
+            $query->whereDate('created_at', '>=', $request->startDate);
+        }
+
+        if ($request->filled('endDate')) {
+            $query->whereDate('created_at', '<=', $request->endDate);
+        }
+
+        $users = $query->with('profile', 'addresses')->get();
+
+        return response()->json(['data' => $users]);
     }
 }
