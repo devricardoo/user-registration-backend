@@ -37,3 +37,12 @@ Clone o repositório para o seu ambiente local:
 git clone https://github.com/devricardoo/user-registration-backend.git
 cd user-registration-backend
 ```
+
+### 2. Detalhes importantes
+
+Foi adicionado a parte de login com token, onde é necessário fazer login.
+
+Segue abaixo um usuário padrão que tem a permissão de ADM:
+
+-   ricardo@gmail.com
+-   123456 (password)
