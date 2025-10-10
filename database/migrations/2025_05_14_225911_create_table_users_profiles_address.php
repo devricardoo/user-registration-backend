@@ -53,9 +53,9 @@ class CreateTableUsersProfilesAddress extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('profiles');
+        Schema::dropIfExists('addresses_users');
         Schema::dropIfExists('users');
         Schema::dropIfExists('addresses');
-        Schema::dropIfExists('addresses_users');
+        Schema::dropIfExists('profiles');
     }
 }
