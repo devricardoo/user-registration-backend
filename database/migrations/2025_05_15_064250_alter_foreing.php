@@ -14,6 +14,8 @@ class AlterForeing extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropForeign(['profile_id']);
+
             // Se necessário, remova a coluna 'profile_id'
             $table->dropColumn('profile_id');
         });
