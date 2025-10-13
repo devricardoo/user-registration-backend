@@ -21,10 +21,10 @@ services:
         image: mysql:8.0
         container_name: mysql-db
         environment:
-            MYSQL_ROOT_PASSWORD: rootpassword
             MYSQL_DATABASE: userregistration
             MYSQL_USER: laravel_user
             MYSQL_PASSWORD: 181724
+            MYSQL_ROOT_PASSWORD: rootpassword
         volumes:
             - mysql-data:/var/lib/mysql
         ports:
