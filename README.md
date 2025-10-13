@@ -37,7 +37,7 @@ docker compose up -d
 No terminal, rode o comando para acessar o contêiner já criado:
 
 ```bash
-docker compose exec -it user-registration bash
+docker exec -it user-registration bash
 ```
 
 Basicamente, esse comando abre um shell Bash dentro do container do serviço já em execução, permitindo rodar comandos diretamente no ambiente do container.
