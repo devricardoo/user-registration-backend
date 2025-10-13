@@ -34,6 +34,11 @@ class CreateTableUsersProfilesAddress extends Migration
             $table->id();
             $table->string('public_place', 100);
             $table->string('cep', 8);
+            $table->string('neighborhood', 100);
+            $table->string('city', 50);
+            $table->string('state', 2);
+            $table->string('number', 10)->nullable();
+            $table->string('complement', 100)->nullable();
             $table->timestamps();
         });
 
