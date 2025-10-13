@@ -7,6 +7,10 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+# 📦 User Registration Backend
+
+Projeto de backend para cadastro de usuários utilizando Laravel, JWT e Docker.
+
 ## Instalação
 
 ## 1. Clone o repositório
@@ -38,9 +42,9 @@ docker compose exec -it user-registration bash
 
 Basicamente, esse comando abre um shell Bash dentro do container do serviço já em execução, permitindo rodar comandos diretamente no ambiente do container.
 
-## 4. Instalar as dependências do Laravel
+## 4. Instalar dependências com o Composer
 
-Com o shell Bash aberto dentro de contêiner, rode o seguinte comando para instalar as dependências do Laravel:
+Com o shell Bash aberto dentro do contêiner, rode o seguinte comando para instalar as dependências do Laravel:
 
 ```bash
 composer install
@@ -48,7 +52,7 @@ composer install
 
 ## 5. Alterar arquivo .env para rodar as Migrations
 
-Após o clone do repositório, renomei o arquivo .env.example para .env. Em seguida, coloque os dados do MySql com base no banco de dados que está configurado no arquivo docker-compose.yml. Exemplo no .env:
+Após o clone do repositório, renomeie o arquivo .env.example para .env. Em seguida, coloque os dados do MySql com base no banco de dados que está configurado no arquivo docker-compose.yml. Exemplo no .env:
 
 ```bash
 DB_CONNECTION=mysql
@@ -71,7 +75,7 @@ php artisan key:generate
 
 Para que o sistema de autenticação via JWT funcione corretamente, é necessário gerar uma chave secreta que será usada para assinar os tokens.
 
-Execute o seguinte comando dentro do container Laravel:
+Execute o seguinte comando dentro do contêiner Laravel:
 
 ```bash
 php artisan jwt:secret
