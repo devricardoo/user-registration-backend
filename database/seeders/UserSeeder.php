@@ -15,10 +15,10 @@ class UserSeeder extends Seeder
     public function run()
     {
         User::create([
-            'name' => 'Ricardo',
-            'email' => 'ricardo@gmail.com',
-            'password' => bcrypt('12345678'),
-            'cpf' => '12345678901',
+            'name' => 'Adm user',
+            'email' => 'admuser@gmail.com',
+            'password' => bcrypt('Ausr123456@#'),
+            'cpf' => '12345678910',
             'profile_id' => 1,
         ]);
     }
