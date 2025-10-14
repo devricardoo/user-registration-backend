@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Models\Profile;
 use Illuminate\Support\Facades\Hash;
 
-class Usercontroller extends Controller
+class UserController extends Controller
 {
     private $user;
 

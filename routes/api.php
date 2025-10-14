@@ -35,8 +35,8 @@ Route::delete('/profile/{id}', 'App\Http\Controllers\ProfileController@delete');
 Route::get('/address', 'App\Http\Controllers\AddressController@index');
 Route::get('/address/{id}', 'App\Http\Controllers\AddressController@show');
 Route::post('/address', 'App\Http\Controllers\AddressController@store');
-//Route::put('/address/{id}', 'App\Http\Controllers\AddressController@update'); optional
-//Route::patch('/address/{id}', 'App\Http\Controllers\AddressController@update'); optional
+Route::put('/address/{id}', 'App\Http\Controllers\AddressController@update'); // optional
+Route::patch('/address/{id}', 'App\Http\Controllers\AddressController@update'); // optional
 Route::delete('/address/{id}', 'App\Http\Controllers\AddressController@delete');
 
 Route::get('/search', 'App\Http\Controllers\SearchController@search');
