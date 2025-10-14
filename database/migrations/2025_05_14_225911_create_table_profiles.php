@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AlterTableUsersProfilesAddress extends Migration
+class CreateTableProfiles extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,10 @@ class AlterTableUsersProfilesAddress extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('profile_id')->nullable()->change();
+        Schema::create('profiles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->timestamps();
         });
     }
 
@@ -25,8 +27,7 @@ class AlterTableUsersProfilesAddress extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('profile_id')->nullable(false)->change();
-        });
+
+        Schema::dropIfExists('profiles');
     }
 }
