@@ -2,21 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Address;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use App\Models\Profile;
-use Illuminate\Support\Facades\Hash;
+use App\Services\UserService;
 
 class UserController extends Controller
 {
-    private $user;
-
-    public function __construct(User $user)
-    {
-        $this->user = $user;
-    }
+    public function __construct(private readonly UserService $service) {}
 
 
     public function index(Request $request)
@@ -26,12 +17,7 @@ class UserController extends Controller
             'page' => 'nullable|integer|min:1',
         ]);
 
-
-        $perPage = $validated['per_page'] ?? 5;
-        $page = $validated['page'] ?? 1;
-
-        $users = User::with(['profile', 'addresses'])
-            ->paginate($perPage);
+        $users = $this->service->index($validated);
 
         // Adds 'per_page' and 'page' parameters to pagination response to make frontend navigation easier
         $users->appends($request->all());
@@ -42,103 +28,45 @@ class UserController extends Controller
 
     public function createprofile(Request $request)
     {
-        $profile = Profile::create($request->all());
-        return response()->json($profile, 200);
+        $this->service->createprofile($request->all());
+        return response()->json(['msg' => 'Perfil criado com sucesso'], 201);
+    }
+
+    public function login(Request $request)
+    {
+        return $this->service->login($request->all());
+    }
+
+    public function create(Request $request)
+    {
+        $request->validate($this->service->entity->rules(), $this->service->entity->feedback());
+
+        $user = $this->service->create($request->all());
+
+        return $user;
     }
 
     public function show($id)
     {
-        $user = User::with(['profile', 'addresses'])->find($id);
-        if (!$user) {
-            return response()->json(['error' => 'Usuário não encontrado'], 404);
-        }
-        return response()->json($user, 200);
+        return $this->service->show($id);
     }
 
     public function update(Request $request, $id)
     {
-        $user = $this->user->find($id);
+        $user = $this->service->findById($id);
 
-        if ($user == null) {
-            return response()->json(['error' => 'Este usuário não foi encontrado'], 404);
-        }
+        $validated = $request->validate(
+            $this->service->entity->rules($user->id),
+            $this->service->entity->feedback()
+        );
 
-        if ($request->method() === 'PATCH') {
-            $rulesDinamic = [];
-            foreach ($user->rules() as $input => $rule) {
-                if (array_key_exists($input, $request->all())) {
-                    if ($input == 'password') {
-                        $rulesDinamic[$input] = 'confirmed|string|min:4';
-                    } else {
-                        $rulesDinamic[$input] = $rule;
-                    }
-                }
-            }
+        $user = $this->service->update($id, $validated);
 
-            if ($request->has('addresses')) {
-                foreach ($user->rules() as $input => $rule) {
-                    if (str_starts_with($input, 'addresses')) {
-                        $rulesDinamic[$input] = $rule;
-                    }
-                }
-            }
-
-            $request->validate($rulesDinamic, $user->feedback());
-        } else {
-            $request->validate($user->rules(), $user->feedback());
-        }
-
-        $data = $request->all();
-
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        }
-
-        $user->update($data);
-
-
-        if ($request->has('addresses')) {
-            foreach ($request->addresses as $addressData) {
-                if (isset($addressData['id'])) {
-                    $address = Address::find($addressData['id']);
-                    if (!$address || !$user->addresses->contains($address->id)) {
-                        return response()->json(['error' => 'Endereço não pertence ao usuário'], 403);
-                    }
-                    $address->update($addressData);
-                } else {
-                    // Creates new address linked to the user
-                    $user->addresses()->create($addressData);
-                }
-            }
-        }
-
-        return response()->json($user->load('profile', 'addresses'), 200);
+        return response()->json($user);
     }
 
     public function delete($id)
     {
-        $user = User::find($id);
-
-        if (!$user) {
-            return response()->json(['error' => 'Usuário não encontrado'], 404);
-        }
-
-        $auth = Auth::user();
-        if ($auth->id == $user->id) {
-            return response()->json(['error' => 'Usuário logado não pode ser deletado'], 401);
-        }
-
-
-        $user->addresses()->detach();
-
-        foreach ($user->addresses as $address) {
-            if ($address->users()->count() === 0) {
-                $address->delete();
-            }
-        }
-
-        $user->delete();
-
-        return response()->json(['msg' => 'Usuário deletado com sucesso'], 200);
+        return $this->service->delete($id);
     }
 }
