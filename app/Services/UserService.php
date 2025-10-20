@@ -163,4 +163,9 @@ class UserService
 
     return response()->json(['msg' => 'Usuário deletado com sucesso']);
   }
+
+  public function search(array $data)
+  {
+    return $this->repository->search($data);
+  }
 }

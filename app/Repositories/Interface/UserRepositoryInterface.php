@@ -20,4 +20,6 @@ interface UserRepositoryInterface
   public function update(User $entity, array $data);
 
   public function delete(User $entity);
+
+  public function search(array $data);
 }

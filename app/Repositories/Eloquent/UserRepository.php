@@ -56,4 +56,32 @@ class UserRepository implements UserRepositoryInterface
   {
     $entity->delete();
   }
+
+  public function search(array $data)
+  {
+    $query = $this->entity::query()
+      ->with([
+        'profile',
+        'addresses',
+      ]);
+    $perPage = $data['per_page'] ?? 10;
+
+    if (isset($data['name'])) {
+      $query->where('name', 'like', '%' . mb_strtoupper($data['name']) . '%');
+    }
+
+    if (isset($data['cpf'])) {
+      $query->where('cpf', 'like', '%' . mb_strtoupper($data['cpf']) . '%');
+    }
+
+    if (isset($data['startDate'])) {
+      $query->where('created_at', 'like', '%' . mb_strtoupper($data['startDate']) . '%');
+    }
+
+    if (isset($data['endDate'])) {
+      $query->where('created_at', 'like', '%' . mb_strtoupper($data['endDate']) . '%');
+    }
+
+    return $query->paginate($perPage);
+  }
 }
