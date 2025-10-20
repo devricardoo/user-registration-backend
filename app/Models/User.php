@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Tymon\JWTAuth\Contracts\JWTSubject;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -53,13 +52,13 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function rules()
+    public function rules($id = null)
     {
         return [
             'name' => 'required',
             'email' => 'required|string|email|max:100|unique:users,email,' . $this->id,
             'password' => 'required|string|min:6|confirmed',
-            'cpf' => 'required|string|max:11|unique:users,cpf,' . $this->id,
+            'cpf' => 'required|string|max:11|unique:users,cpf,' . $id,
             'profile_id' => 'nullable|exists:profiles,id',
             'addresses' => 'sometimes|array',
             'addresses.*.id' => 'sometimes|exists:addresses,id',
