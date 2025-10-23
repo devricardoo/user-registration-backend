@@ -14,31 +14,38 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/404', 'App\Http\Controllers\AuthController@unauthorized');
-
-Route::post('/auth/login', 'App\Http\Controllers\AuthController@login');
+Route::post('/auth/login', 'App\Http\Controllers\UserController@login');
 Route::post('/auth/logout', 'App\Http\Controllers\AuthController@logout');
 Route::post('/auth/refresh', 'App\Http\Controllers\AuthController@refresh');
 Route::get('/me', 'App\Http\Controllers\AuthController@me');
-Route::post('/user', 'App\Http\Controllers\AuthController@create');
 
-Route::get('/user', 'App\Http\Controllers\UserController@index');
-Route::get('/user/{id}', 'App\Http\Controllers\UserController@show');
-Route::put('/user/{id}', 'App\Http\Controllers\UserController@update');
-Route::patch('/user/{id}', 'App\Http\Controllers\UserController@update');
-Route::delete('/user/{id}', 'App\Http\Controllers\UserController@delete');
+Route::group(['middleware' => ['auth:api']], function () {
+  Route::prefix('user')->group(function () {
+    Route::get('/', 'App\Http\Controllers\UserController@index');
+    Route::post('/', 'App\Http\Controllers\UserController@create');
+    Route::get('/{id}', 'App\Http\Controllers\UserController@show');
+    Route::put('/{id}', 'App\Http\Controllers\UserController@update');
+    Route::patch('/{id}', 'App\Http\Controllers\UserController@update');
+    Route::delete('/{id}', 'App\Http\Controllers\UserController@delete');
+  });
 
-Route::post('/profile', 'App\Http\Controllers\UserController@createprofile');
-Route::post('/profile/{id}', 'App\Http\Controllers\ProfileController@update');
-Route::delete('/profile/{id}', 'App\Http\Controllers\ProfileController@delete');
+  Route::prefix('profile')->group(function () {
+    Route::post('/', 'App\Http\Controllers\UserController@createprofile');
+    Route::post('/{id}', 'App\Http\Controllers\ProfileController@update');
+    Route::delete('/{id}', 'App\Http\Controllers\ProfileController@delete');
+  });
 
-Route::get('/address', 'App\Http\Controllers\AddressController@index');
-Route::get('/address/{id}', 'App\Http\Controllers\AddressController@show');
-Route::post('/address', 'App\Http\Controllers\AddressController@store');
-Route::put('/address/{id}', 'App\Http\Controllers\AddressController@update'); // optional
-Route::patch('/address/{id}', 'App\Http\Controllers\AddressController@update'); // optional
-Route::delete('/address/{id}', 'App\Http\Controllers\AddressController@delete');
+  Route::prefix('address')->group(function () {
+    Route::get('/', 'App\Http\Controllers\AddressController@index');
+    Route::get('/{id}', 'App\Http\Controllers\AddressController@show');
+    Route::get('/cep/{cep}', 'App\Http\Controllers\AddressController@searchByCep');
+    Route::post('/', 'App\Http\Controllers\AddressController@store');
+    Route::put('/{id}', 'App\Http\Controllers\AddressController@update'); // optional
+    Route::patch('/{id}', 'App\Http\Controllers\AddressController@update'); // optional
+    Route::delete('/{id}', 'App\Http\Controllers\AddressController@delete');
+  });
 
-Route::get('/search', 'App\Http\Controllers\SearchController@search');
-
-Route::get('/address/cep/{cep}', 'App\Http\Controllers\AddressController@searchByCep');
+  Route::prefix('search')->group(function () {
+    Route::get('/', 'App\Http\Controllers\SearchController@search');
+  });
+});
