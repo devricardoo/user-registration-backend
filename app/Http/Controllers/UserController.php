@@ -47,12 +47,12 @@ class UserController extends Controller
         return $user;
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         return $this->service->show($id);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
         $user = $this->service->findById($id);
 
@@ -66,7 +66,7 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function delete($id)
+    public function delete(int $id)
     {
         return $this->service->delete($id);
     }
