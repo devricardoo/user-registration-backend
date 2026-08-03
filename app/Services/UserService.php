@@ -84,7 +84,7 @@ class UserService
     }
 
     if (is_array($address)) {
-      $requiredKeys = ['public_place', 'cep', 'neighborhood', 'city', 'state', 'number', 'complement'];
+      $requiredKeys = ['public_place', 'cep', 'neighborhood', 'city', 'state'];
 
       if (!empty(array_diff($requiredKeys, array_keys($address)))) {
         return null; // endereço incompleto
@@ -96,8 +96,8 @@ class UserService
         'neighborhood' => $address['neighborhood'],
         'city'         => $address['city'],
         'state'        => $address['state'],
-        'number'       => $address['number'],
-        'complement'   => $address['complement'],
+        'number'       => $address['number'] ?? null,
+        'complement'   => $address['complement'] ?? null,
       ]);
 
       return $newAddress->id;
@@ -154,8 +154,16 @@ class UserService
 
             $address->update($addressData);
           } else {
-            // Cria novo endereço vinculado ao usuário
-            $user->addresses()->create($addressData);
+            // Reutiliza um endereço idêntico e evita vínculos duplicados
+            $addressId = $this->resolveAddressId($addressData);
+
+            if (!$addressId) {
+              throw ValidationException::withMessages([
+                "addresses.$index" => ['Endereço incompleto.'],
+              ]);
+            }
+
+            $user->addresses()->syncWithoutDetaching($addressId);
           }
         }
       }

@@ -44,7 +44,9 @@ class UserController extends Controller
 
         $user = $this->service->create($request->all());
 
-        return $user;
+        return response()->json([
+            'message' => 'Usuário criado com sucesso.',
+        ], 201);
     }
 
     public function show(int $id)
@@ -61,7 +63,7 @@ class UserController extends Controller
 
         $user = $this->service->update($id, $validated);
 
-        return response()->json($user);
+        return response()->json(['message' => 'Usuário atualizado com sucesso.'], 200);
     }
 
     public function delete(int $id)
