@@ -2,19 +2,18 @@
 
 namespace App\Models;
 
-use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $hidden = [
         'password',
-        'token',
+        'remember_token',
     ];
 
     protected $table = 'users';
@@ -25,7 +24,6 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'cpf',
         'profile_id',
-        'token',
     ];
 
     protected $casts = [
@@ -40,16 +38,6 @@ class User extends Authenticatable implements JWTSubject
     public function addresses()
     {
         return $this->belongsToMany(Address::class, 'addresses_users');
-    }
-
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    public function getJWTCustomClaims()
-    {
-        return [];
     }
 
     public function rules($id = null)
