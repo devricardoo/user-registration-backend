@@ -16,18 +16,20 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'name' => 'Adm user',
-                'email' => 'admuser@gmail.com',
-                'password' => bcrypt('Ausr123456@#'),
+                'name' => 'Admin user',
+                'email' => 'adminuser@gmail.com',
+                'password' => bcrypt('Ab123456@#'),
                 'cpf' => '12345678910',
                 'profile_id' => 1,
+                'created_at' => now(),
             ],
             [
                 'name' => 'User',
                 'email' => 'userprofile@gmail.com',
-                'password' => bcrypt('Ausr123456@#'),
+                'password' => bcrypt('Ab123456@#'),
                 'cpf' => '12345678911',
                 'profile_id' => 2,
+                'created_at' => now(),
             ]
 
         ];
