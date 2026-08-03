@@ -54,10 +54,8 @@ class UserController extends Controller
 
     public function update(Request $request, int $id)
     {
-        $user = $this->service->findById($id);
-
         $validated = $request->validate(
-            $this->service->entity->rules($user->id),
+            $this->service->entity->updateRules($id),
             $this->service->entity->feedback()
         );
 
@@ -68,6 +66,10 @@ class UserController extends Controller
 
     public function delete(int $id)
     {
-        return $this->service->delete($id);
+        $this->service->delete($id);
+
+        return response()->json([
+            'message' => 'Usuário deletado com sucesso.',
+        ]);
     }
 }

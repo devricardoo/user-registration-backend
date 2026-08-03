@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserService
@@ -125,6 +126,9 @@ class UserService
   {
     return DB::transaction(function () use ($id, $data) {
       $user = $this->show($id);
+      $addresses = $data['addresses'] ?? null;
+
+      unset($data['addresses'], $data['password_confirmation']);
 
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
@@ -136,14 +140,18 @@ class UserService
       $this->repository->update($user, $data);
 
       // Se vierem endereços
-      if (isset($data['addresses']) && is_array($data['addresses'])) {
-        foreach ($data['addresses'] as $addressData) {
+      if (is_array($addresses)) {
+        foreach ($addresses as $index => $addressData) {
           if (isset($addressData['id'])) {
             // Atualiza endereço existente
-            $address = Address::find($addressData['id']);
-            if (!$address || !$user->addresses->contains($address->id)) {
-              throw new \Exception('Endereço não pertence ao usuário.');
+            $address = $user->addresses()->find($addressData['id']);
+
+            if (!$address) {
+              throw ValidationException::withMessages([
+                "addresses.$index.id" => ['Endereço não pertence ao usuário.'],
+              ]);
             }
+
             $address->update($addressData);
           } else {
             // Cria novo endereço vinculado ao usuário
@@ -156,25 +164,25 @@ class UserService
     });
   }
 
-  public function delete(int $id)
+  public function delete(int $id): void
   {
-    $entity = $this->repository->findById($id);
+    DB::transaction(function () use ($id) {
+      $user = $this->repository->findById($id);
 
-    if (!$entity) {
-      return response()->json(['error' => 'Usuário não encontrado'], 404);
-    }
-
-    $entity->addresses()->detach();
-
-    foreach ($entity->addresses as $address) {
-      if ($address->users()->count() === 0) {
-        $address->delete();
+      if (!$user) {
+        throw new NotFoundHttpException('Usuário não encontrado.');
       }
-    }
 
-    $this->repository->delete($entity);
+      $addresses = $user->addresses()->get();
 
-    return response()->json(['msg' => 'Usuário deletado com sucesso']);
+      $this->repository->delete($user);
+
+      foreach ($addresses as $address) {
+        if (!$address->users()->exists()) {
+          $address->delete();
+        }
+      }
+    });
   }
 
   public function search(array $data)

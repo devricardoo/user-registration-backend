@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Validation\Rule;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -45,7 +46,7 @@ class User extends Authenticatable
     {
         return [
             'name' => 'required',
-            'email' => 'required|string|email|max:100|unique:users,email,' . $this->id,
+            'email' => 'required|string|email|max:100|unique:users,email,' . $id,
             'password' => 'required|string|min:6|confirmed',
             'cpf' => 'required|string|max:11|unique:users,cpf,' . $id,
             'profile_id' => 'nullable|exists:profiles,id',
@@ -59,6 +60,37 @@ class User extends Authenticatable
             'addresses.*.number' => 'nullable|string',
             'addresses.*.complement' => 'nullable|string',
 
+        ];
+    }
+
+    public function updateRules(int $id): array
+    {
+        return [
+            'name' => 'sometimes|string|max:100',
+            'email' => [
+                'sometimes',
+                'string',
+                'email',
+                'max:100',
+                Rule::unique('users', 'email')->ignore($id),
+            ],
+            'password' => 'sometimes|nullable|string|min:6|confirmed',
+            'cpf' => [
+                'sometimes',
+                'string',
+                'max:11',
+                Rule::unique('users', 'cpf')->ignore($id),
+            ],
+            'profile_id' => 'sometimes|integer|exists:profiles,id',
+            'addresses' => 'sometimes|array',
+            'addresses.*.id' => 'sometimes|integer|exists:addresses,id',
+            'addresses.*.public_place' => 'required_without:addresses.*.id|string|max:100',
+            'addresses.*.cep' => 'required_without:addresses.*.id|digits:8',
+            'addresses.*.neighborhood' => 'required_without:addresses.*.id|string|max:100',
+            'addresses.*.city' => 'required_without:addresses.*.id|string|max:50',
+            'addresses.*.state' => 'required_without:addresses.*.id|string|size:2',
+            'addresses.*.number' => 'nullable|string|max:10',
+            'addresses.*.complement' => 'nullable|string|max:100',
         ];
     }
 

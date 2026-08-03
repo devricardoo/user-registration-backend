@@ -54,7 +54,7 @@ class UserRepository implements UserRepositoryInterface
     return $entity;
   }
 
-  public function delete(User $entity)
+  public function delete(User $entity): void
   {
     $entity->delete();
   }
