@@ -34,7 +34,8 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
-        return $this->service->login($request->all());
+        $resultado = $this->service->login($request->all());
+        return response()->json($resultado, 200);
     }
 
     public function create(Request $request)
