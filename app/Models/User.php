@@ -28,6 +28,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'profile_id' => 'integer',
+        'last_login_at' => 'datetime',
     ];
 
     public function profile()

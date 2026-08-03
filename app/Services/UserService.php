@@ -34,10 +34,13 @@ class UserService
       ], 401);
     }
 
+    $user->last_login_at = now();
+    $user->save();
+
     $token = $user->createToken('auth_token')->plainTextToken;
 
     return response()->json([
-      'token' => $token,
+      'token' => $token
     ]);
   }
 
