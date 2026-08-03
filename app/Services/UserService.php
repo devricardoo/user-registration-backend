@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Address;
 use App\Models\User;
 use App\Repositories\Interface\UserRepositoryInterface;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -24,26 +23,6 @@ class UserService
   public function createprofile(array $data)
   {
     return $this->repository->createprofile($data);
-  }
-
-  public function login(array $data)
-  {
-    $user = User::where('email', $data['email'])->first();
-
-    if (!$user || !Hash::check($data['password'], $user->password)) {
-      return response()->json([
-        'error' => 'Credenciais inválidas'
-      ], 401);
-    }
-
-    $user->last_login_at = now();
-    $user->save();
-
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return [
-      'token' => $token
-    ];
   }
 
   public function create(array $data): User

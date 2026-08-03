@@ -32,12 +32,6 @@ class UserController extends Controller
         return response()->json(['msg' => 'Perfil criado com sucesso'], 201);
     }
 
-    public function login(Request $request)
-    {
-        $resultado = $this->service->login($request->all());
-        return response()->json($resultado, 200);
-    }
-
     public function create(Request $request)
     {
         $request->validate($this->service->entity->rules(), $this->service->entity->feedback());
