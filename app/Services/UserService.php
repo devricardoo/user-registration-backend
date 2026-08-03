@@ -26,11 +26,15 @@ class UserService
 
   public function login(array $data)
   {
-    if (!$token = Auth::attempt($data)) {
+    $user = User::where('email', $data['email'])->first();
+
+    if (!$user || !Hash::check($data['password'], $user->password)) {
       return response()->json([
         'error' => 'Credenciais inválidas'
       ], 401);
     }
+
+    $token = $user->createToken('auth_token')->plainTextToken;
 
     return response()->json([
       'token' => $token,
@@ -106,7 +110,6 @@ class UserService
   {
     return $this->repository->show($id);
   }
-
 
   public function update(int $id, array $data): User
   {
