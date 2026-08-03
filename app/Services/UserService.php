@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserService
 {
@@ -106,18 +107,24 @@ class UserService
 
   public function show(int $id): User
   {
-    return $this->repository->show($id);
+    $user = $this->repository->show($id);
+
+    if ($user === null) {
+      throw new NotFoundHttpException('Usuário não encontrado.');
+    }
+
+    return $user;
   }
 
-  public function findById($id): User
+  public function findById(int $id): User
   {
-    return $this->repository->show($id);
+    return $this->show($id);
   }
 
   public function update(int $id, array $data): User
   {
     return DB::transaction(function () use ($id, $data) {
-      $user = $this->repository->show($id);
+      $user = $this->show($id);
 
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);

@@ -13,9 +13,9 @@ interface UserRepositoryInterface
 
   public function create(array $data): User;
 
-  public function show(int $id): User;
+  public function show(int $id): ?User;
 
-  public function findById(int $id): User;
+  public function findById(int $id): ?User;
 
   public function update(User $entity, array $data);
 
