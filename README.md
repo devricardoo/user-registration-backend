@@ -40,8 +40,6 @@ No terminal, rode o comando para acessar o contêiner já criado:
 docker exec -it user-management-php bash
 ```
 
-Basicamente, esse comando abre um shell Bash dentro do container do serviço já em execução, permitindo rodar comandos diretamente no ambiente do container.
-
 ## 4. Instalar dependências com o Composer
 
 Com o shell Bash aberto dentro do contêiner, rode o seguinte comando para instalar as dependências do Laravel:
