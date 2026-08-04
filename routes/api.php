@@ -38,7 +38,8 @@ Route::group(['middleware' => ['auth:api']], function () {
   Route::prefix('address')->group(function () {
     Route::get('/', 'App\Http\Controllers\AddressController@index');
     Route::get('/{id}', 'App\Http\Controllers\AddressController@show');
-    Route::get('/cep/{cep}', 'App\Http\Controllers\AddressController@searchByCep');
+    Route::get('/cep/{cep}', 'App\Http\Controllers\AddressController@searchByCep')
+      ->where('cep', '[0-9-]+');
     Route::post('/', 'App\Http\Controllers\AddressController@store');
     Route::put('/{id}', 'App\Http\Controllers\AddressController@update'); // optional
     Route::patch('/{id}', 'App\Http\Controllers\AddressController@update'); // optional
