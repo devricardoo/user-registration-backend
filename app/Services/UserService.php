@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\Address;
 use App\Models\User;
 use App\Repositories\Interface\UserRepositoryInterface;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserService
 {
@@ -22,23 +23,6 @@ class UserService
   public function createprofile(array $data)
   {
     return $this->repository->createprofile($data);
-  }
-
-  public function login(array $data)
-  {
-    $user = User::where('email', $data['email'])->first();
-
-    if (!$user || !Hash::check($data['password'], $user->password)) {
-      return response()->json([
-        'error' => 'Credenciais inválidas'
-      ], 401);
-    }
-
-    $token = $user->createToken('auth_token')->plainTextToken;
-
-    return response()->json([
-      'token' => $token,
-    ]);
   }
 
   public function create(array $data): User
@@ -79,7 +63,7 @@ class UserService
     }
 
     if (is_array($address)) {
-      $requiredKeys = ['public_place', 'cep', 'neighborhood', 'city', 'state', 'number', 'complement'];
+      $requiredKeys = ['public_place', 'cep', 'neighborhood', 'city', 'state'];
 
       if (!empty(array_diff($requiredKeys, array_keys($address)))) {
         return null; // endereço incompleto
@@ -91,8 +75,8 @@ class UserService
         'neighborhood' => $address['neighborhood'],
         'city'         => $address['city'],
         'state'        => $address['state'],
-        'number'       => $address['number'],
-        'complement'   => $address['complement'],
+        'number'       => $address['number'] ?? null,
+        'complement'   => $address['complement'] ?? null,
       ]);
 
       return $newAddress->id;
@@ -103,18 +87,27 @@ class UserService
 
   public function show(int $id): User
   {
-    return $this->repository->show($id);
+    $user = $this->repository->show($id);
+
+    if ($user === null) {
+      throw new NotFoundHttpException('Usuário não encontrado.');
+    }
+
+    return $user;
   }
 
-  public function findById($id): User
+  public function findById(int $id): User
   {
-    return $this->repository->show($id);
+    return $this->show($id);
   }
 
   public function update(int $id, array $data): User
   {
     return DB::transaction(function () use ($id, $data) {
-      $user = $this->repository->show($id);
+      $user = $this->show($id);
+      $addresses = $data['addresses'] ?? null;
+
+      unset($data['addresses'], $data['password_confirmation']);
 
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
@@ -126,18 +119,30 @@ class UserService
       $this->repository->update($user, $data);
 
       // Se vierem endereços
-      if (isset($data['addresses']) && is_array($data['addresses'])) {
-        foreach ($data['addresses'] as $addressData) {
+      if (is_array($addresses)) {
+        foreach ($addresses as $index => $addressData) {
           if (isset($addressData['id'])) {
             // Atualiza endereço existente
-            $address = Address::find($addressData['id']);
-            if (!$address || !$user->addresses->contains($address->id)) {
-              throw new \Exception('Endereço não pertence ao usuário.');
+            $address = $user->addresses()->find($addressData['id']);
+
+            if (!$address) {
+              throw ValidationException::withMessages([
+                "addresses.$index.id" => ['Endereço não pertence ao usuário.'],
+              ]);
             }
+
             $address->update($addressData);
           } else {
-            // Cria novo endereço vinculado ao usuário
-            $user->addresses()->create($addressData);
+            // Reutiliza um endereço idêntico e evita vínculos duplicados
+            $addressId = $this->resolveAddressId($addressData);
+
+            if (!$addressId) {
+              throw ValidationException::withMessages([
+                "addresses.$index" => ['Endereço incompleto.'],
+              ]);
+            }
+
+            $user->addresses()->syncWithoutDetaching($addressId);
           }
         }
       }
@@ -146,25 +151,25 @@ class UserService
     });
   }
 
-  public function delete(int $id)
+  public function delete(int $id): void
   {
-    $entity = $this->repository->findById($id);
+    DB::transaction(function () use ($id) {
+      $user = $this->repository->findById($id);
 
-    if (!$entity) {
-      return response()->json(['error' => 'Usuário não encontrado'], 404);
-    }
-
-    $entity->addresses()->detach();
-
-    foreach ($entity->addresses as $address) {
-      if ($address->users()->count() === 0) {
-        $address->delete();
+      if (!$user) {
+        throw new NotFoundHttpException('Usuário não encontrado.');
       }
-    }
 
-    $this->repository->delete($entity);
+      $addresses = $user->addresses()->get();
 
-    return response()->json(['msg' => 'Usuário deletado com sucesso']);
+      $this->repository->delete($user);
+
+      foreach ($addresses as $address) {
+        if (!$address->users()->exists()) {
+          $address->delete();
+        }
+      }
+    });
   }
 
   public function search(array $data)

@@ -21,6 +21,7 @@ class CreateTableUsers extends Migration
             $table->string('cpf', 11)->unique();
             $table->foreignId('profile_id')->constrained('profiles')->onDelete('cascade');
             $table->string('token', 200)->nullable();
+            $table->timestamp('last_login_at')->nullable();
             $table->timestamps();
         });
     }

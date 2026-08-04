@@ -32,41 +32,40 @@ class UserController extends Controller
         return response()->json(['msg' => 'Perfil criado com sucesso'], 201);
     }
 
-    public function login(Request $request)
-    {
-        return $this->service->login($request->all());
-    }
-
     public function create(Request $request)
     {
         $request->validate($this->service->entity->rules(), $this->service->entity->feedback());
 
         $user = $this->service->create($request->all());
 
-        return $user;
+        return response()->json([
+            'message' => 'Usuário criado com sucesso.',
+        ], 201);
     }
 
-    public function show($id)
+    public function show(int $id)
     {
         return $this->service->show($id);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id)
     {
-        $user = $this->service->findById($id);
-
         $validated = $request->validate(
-            $this->service->entity->rules($user->id),
+            $this->service->entity->updateRules($id),
             $this->service->entity->feedback()
         );
 
         $user = $this->service->update($id, $validated);
 
-        return response()->json($user);
+        return response()->json(['message' => 'Usuário atualizado com sucesso.'], 200);
     }
 
-    public function delete($id)
+    public function delete(int $id)
     {
-        return $this->service->delete($id);
+        $this->service->delete($id);
+
+        return response()->json([
+            'message' => 'Usuário deletado com sucesso.',
+        ]);
     }
 }

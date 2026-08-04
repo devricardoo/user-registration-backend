@@ -36,12 +36,14 @@ class UserRepository implements UserRepositoryInterface
     return $user;
   }
 
-  public function show(int $id): User
+  public function show(int $id): ?User
   {
-    return $this->entity::with('addresses')->find($id);
+    return $this->entity
+      ->with(['profile', 'addresses'])
+      ->find($id);
   }
 
-  public function findById(int $id): User
+  public function findById(int $id): ?User
   {
     return $this->entity::find($id);
   }
@@ -52,7 +54,7 @@ class UserRepository implements UserRepositoryInterface
     return $entity;
   }
 
-  public function delete(User $entity)
+  public function delete(User $entity): void
   {
     $entity->delete();
   }
