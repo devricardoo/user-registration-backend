@@ -1,4 +1,4 @@
-FROM php:8.3.0-cli
+FROM php:8.3.0-fpm
 
 ARG user=laravel
 ARG uid=1000
@@ -50,6 +50,8 @@ RUN mkdir -p storage/{app/{public,uploads},framework/{cache,sessions,views},logs
     && chmod -R 777 storage bootstrap/cache \
     && chown -R $user:$user /var/www
 
-EXPOSE 8000
+# Porta padrão do PHP-FPM
+EXPOSE 9000
 
-CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]
+# Executa o PHP-FPM para receber requisições do Nginx
+CMD ["php-fpm"]

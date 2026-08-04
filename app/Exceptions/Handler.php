@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
+use App\Models\User;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -34,6 +37,32 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        $this->renderable(function (ModelNotFoundException $exception) {
+            $message = $exception->getModel() === User::class
+                ? 'Usuário não encontrado.'
+                : 'Registro não encontrado.';
+
+            return response()->json([
+                'message' => $message,
+            ], 404);
+        });
+
+        $this->renderable(function (NotFoundHttpException $exception) {
+            $previous = $exception->getPrevious();
+
+            if ($previous instanceof ModelNotFoundException) {
+                $message = $previous->getModel() === User::class
+                    ? 'Usuário não encontrado.'
+                    : 'Registro não encontrado.';
+            } else {
+                $message = $exception->getMessage() ?: 'Recurso não encontrado.';
+            }
+
+            return response()->json([
+                'message' => $message,
+            ], 404);
+        });
+
         $this->reportable(function (Throwable $e) {
             //
         });

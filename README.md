@@ -18,8 +18,8 @@ Projeto de backend para cadastro de usuários utilizando Laravel, JWT e Docker.
 No seu terminal, rode o comando para clonar o repositório:
 
 ```bash
-git clone https://github.com/devricardoo/user-registration-backend.git
-cd user-registration-backend
+git clone https://github.com/devricardoo/user-management-backend.git
+cd user-management-backend
 ```
 
 Abra o arquivo no seu editor de código
@@ -37,10 +37,8 @@ docker compose up -d
 No terminal, rode o comando para acessar o contêiner já criado:
 
 ```bash
-docker exec -it user-registration bash
+docker exec -it user-management-php bash
 ```
-
-Basicamente, esse comando abre um shell Bash dentro do container do serviço já em execução, permitindo rodar comandos diretamente no ambiente do container.
 
 ## 4. Instalar dependências com o Composer
 
@@ -56,7 +54,7 @@ Após o clone do repositório, renomeie o arquivo .env.example para .env. Em seg
 
 ```bash
 DB_CONNECTION=mysql
-DB_HOST=db  # Nome do serviço no docker-compose.yml
+DB_HOST=mysql  # Nome do serviço no docker-compose.yml
 DB_PORT=3306
 DB_DATABASE=nome_do_banco
 DB_USERNAME=user
@@ -71,29 +69,11 @@ O Laravel utiliza a chave de aplicação (APP_KEY) para manter os dados seguros,
 php artisan key:generate
 ```
 
-## 7. Gerar chave JWT
+## 7. Rodar as Migrations e Seeders
 
-Para que o sistema de autenticação via JWT funcione corretamente, é necessário gerar uma chave secreta que será usada para assinar os tokens.
-
-Execute o seguinte comando dentro do contêiner Laravel:
-
-```bash
-php artisan jwt:secret
-```
-
-## 8. Rodar as Migrations
-
-Com o banco de dados configurado no arquivo .env, rode o comando dentro do contêiner:
+Execute as migrações para criar as tabelas no banco de dados e popule os dados iniciais:
 
 ```bash
 php artisan migrate
-```
-
-## 9. Rodar Seeder
-
-Dentro do contêiner, rode os seeders para popular o banco de dados com dados iniciais:
-
-```bash
-php artisan db:seed --class=ProfileSeeder
-php artisan db:seed --class=UserSeeder
+php artisan db:seed
 ```

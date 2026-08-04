@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,38 +18,39 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/auth/login', 'App\Http\Controllers\UserController@login');
-Route::post('/auth/logout', 'App\Http\Controllers\AuthController@logout');
-Route::post('/auth/refresh', 'App\Http\Controllers\AuthController@refresh');
-Route::get('/me', 'App\Http\Controllers\AuthController@me');
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/logout', [AuthController::class, 'logout']);
+Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+Route::get('/me', [AuthController::class, 'me']);
 
 Route::group(['middleware' => ['auth:api']], function () {
   Route::prefix('user')->group(function () {
-    Route::get('/', 'App\Http\Controllers\UserController@index');
-    Route::post('/', 'App\Http\Controllers\UserController@create');
-    Route::get('/{id}', 'App\Http\Controllers\UserController@show');
-    Route::put('/{id}', 'App\Http\Controllers\UserController@update');
-    Route::patch('/{id}', 'App\Http\Controllers\UserController@update');
-    Route::delete('/{id}', 'App\Http\Controllers\UserController@delete');
+    Route::get('/', [UserController::class, 'index']);
+    Route::post('/', [UserController::class, 'create']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::put('/{id}', [UserController::class, 'update']);
+    Route::patch('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'delete']);
   });
 
   Route::prefix('profile')->group(function () {
-    Route::post('/', 'App\Http\Controllers\UserController@createprofile');
+    Route::post('/', [UserController::class, 'createprofile']);
     Route::post('/{id}', 'App\Http\Controllers\ProfileController@update');
     Route::delete('/{id}', 'App\Http\Controllers\ProfileController@delete');
   });
 
   Route::prefix('address')->group(function () {
-    Route::get('/', 'App\Http\Controllers\AddressController@index');
-    Route::get('/{id}', 'App\Http\Controllers\AddressController@show');
-    Route::get('/cep/{cep}', 'App\Http\Controllers\AddressController@searchByCep');
-    Route::post('/', 'App\Http\Controllers\AddressController@store');
-    Route::put('/{id}', 'App\Http\Controllers\AddressController@update'); // optional
-    Route::patch('/{id}', 'App\Http\Controllers\AddressController@update'); // optional
-    Route::delete('/{id}', 'App\Http\Controllers\AddressController@delete');
+    Route::get('/', [AddressController::class, 'index']);
+    Route::get('/{id}', [AddressController::class, 'show']);
+    Route::get('/cep/{cep}', [AddressController::class, 'searchByCep'])
+      ->where('cep', '[0-9-]+');
+    Route::post('/', [AddressController::class, 'store']);
+    Route::put('/{id}', [AddressController::class, 'update']); // optional
+    Route::patch('/{id}', [AddressController::class, 'update']); // optional
+    Route::delete('/{id}', [AddressController::class, 'delete']);
   });
 
   Route::prefix('search')->group(function () {
-    Route::get('/', 'App\Http\Controllers\SearchController@search');
+    Route::get('/', [SearchController::class, 'search']);
   });
 });

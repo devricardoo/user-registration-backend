@@ -2,53 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Address;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
-use Illuminate\Support\Facades\Log;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    private $user;
-
-    public function __construct(User $user)
+    public function __construct(private readonly AuthService $service)
     {
         $this->middleware('auth:api', [
             'except' => [
                 'login',
-                'create',
-                'unauthorized',
-                'user',
             ]
         ]);
-
-        $this->user = $user;
     }
 
-    public function logout()
+    public function login(Request $request)
     {
-        $user = auth()->check();
-        if ($user) {
-            auth()->logout();
-            return response()->json(['msg' => 'Logout realizado com sucesso'], 200);
-        } else {
-            return response()->json(['error' => 'Usuário não logado'], 401);
-        }
-    }
-
-    public function refresh()
-    {
-        $newToken = JWTAuth::parseToken()->refresh();
-
-        return response()->json([
-            'token' => $newToken,
+        $credentials = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
         ]);
+
+        $result = $this->service->login($credentials);
+
+        if (!$result) {
+            return response()->json([
+                'message' => 'Credenciais inválidas.',
+            ], 401);
+        }
+
+        return response()->json($result);
+    }
+
+    public function logout(Request $request)
+    {
+
+        $this->service->logout($request->user());
+
+        return response()->json(['message' => 'Logout realizado com sucesso'], 200);
+    }
+
+    public function refresh(Request $request)
+    {
+        $result = $this->service->refresh($request->user());
+
+        return response()->json($result);
     }
 
     public function me()
     {
-        return response()->json(User::with('profile')->find(auth()->id()));
+        $user = $this->service->me(auth()->id());
+
+        return response()->json($user);
     }
 }
