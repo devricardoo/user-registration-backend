@@ -18,7 +18,7 @@ Projeto de backend para cadastro de usuários utilizando Laravel, JWT e Docker.
 No seu terminal, rode o comando para clonar o repositório:
 
 ```bash
-git clone https://github.com/devricardoo/user-management-backend.git
+git clone https://github.com/bymega/user-management-backend.git
 cd user-management-backend
 ```
 
